@@ -32,7 +32,6 @@ CREATE TABLE fornecedor (
     bairro VARCHAR(100),
     cidade VARCHAR(100),
     uf CHAR(2),
-    pais VARCHAR(100),
 
     observacoes TEXT,
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -43,7 +42,6 @@ CREATE TABLE fornecedor (
 CREATE TABLE cliente (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(150) NOT NULL,
-    tipo_pessoa ENUM('FISICA', 'JURIDICA') NOT NULL DEFAULT 'FISICA',
     cpf_cnpj VARCHAR(18) UNIQUE,
     telefone VARCHAR(20),
     email VARCHAR(100),
@@ -67,11 +65,7 @@ CREATE TABLE peca (
     nome VARCHAR(100) NOT NULL,
     marca VARCHAR(50),
     ano INT,
-    caracteristica_1 VARCHAR(50),
-    caracteristica_2 VARCHAR(50),
     descricao VARCHAR(255),
-    preco_custo DECIMAL(10,2) NOT NULL,
-    preco_venda DECIMAL(10,2) NOT NULL,
     quantidade INT NOT NULL DEFAULT 0,
     estoqueMinimo INT DEFAULT 5,
     localizacao VARCHAR(100),
@@ -89,7 +83,13 @@ CREATE TABLE codigo_associado (
         'OUTRO'
     ) NOT NULL,
     codigo VARCHAR(100) NOT NULL,
-    descricao VARCHAR(255)
+    descricao VARCHAR(255),
+    fk_fornecedor INT NULL,
+    fk_cliente INT NULL,
+    FOREIGN KEY (fk_fornecedor) REFERENCES fornecedor(id),
+    FOREIGN KEY (fk_cliente) REFERENCES cliente(id),
+    CONSTRAINT chk_codigo_associado_origem
+        CHECK (fk_fornecedor IS NOT NULL OR fk_cliente IS NOT NULL)
 );
 
 CREATE TABLE peca_codigo_associado (
@@ -120,28 +120,12 @@ CREATE TABLE peca_similar (
 );
 */
 
--- Relaciona peça com fornecedor
--- Usar para comparar os preços entre fornecedores
-CREATE TABLE peca_fornecedor (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    fk_peca INT NOT NULL,
-    fk_fornecedor INT NOT NULL,
-    codigo_no_fornecedor VARCHAR(100),
-    preco_custo DECIMAL(10,2),
-    prazo_entrega_dias INT,
-    data_ultima_compra DATE,
-    observacoes TEXT,
-    UNIQUE KEY uk_peca_fornecedor (fk_peca, fk_fornecedor),
-    FOREIGN KEY (fk_peca) REFERENCES peca(id),
-    FOREIGN KEY (fk_fornecedor) REFERENCES fornecedor(id)
-);
+-- ENTRADA
 
--- COMPRA (ENTRADA)
-
-CREATE TABLE compra (
+CREATE TABLE entrada (
     id INT AUTO_INCREMENT PRIMARY KEY,
     fk_fornecedor INT,
-    data_compra DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_entrada DATETIME DEFAULT CURRENT_TIMESTAMP,
     valor_total DECIMAL(10,2),
     numero_nota_fiscal VARCHAR(50),
     prazo_entrega DATE,
@@ -151,33 +135,16 @@ CREATE TABLE compra (
     FOREIGN KEY (fk_fornecedor) REFERENCES fornecedor(id)
 );
 
--- VENDA (SAÍDA)
+-- SAÍDA
 
-CREATE TABLE venda (
+CREATE TABLE saida (
     id INT AUTO_INCREMENT PRIMARY KEY,
     fk_cliente INT,
-    data_venda DATETIME DEFAULT CURRENT_TIMESTAMP,
+    data_saida DATETIME DEFAULT CURRENT_TIMESTAMP,
     valor_total DECIMAL(10,2),
     status ENUM('PENDENTE', 'CONCLUIDA', 'CANCELADA') DEFAULT 'PENDENTE',
     observacoes TEXT,
     FOREIGN KEY (fk_cliente) REFERENCES cliente(id)
-);
-
--- MOVIMENTAÇÃO DE ESTOQUE
-
-CREATE TABLE movimentacao_estoque (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    fk_peca INT NOT NULL,
-    tipo ENUM('ENTRADA', 'SAIDA', 'AJUSTE') NOT NULL,
-    quantidade INT NOT NULL,
-    preco_unitario DECIMAL(10,2),
-    data_movimentacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-    observacoes TEXT,
-    fk_compra INT NULL,
-    fk_venda INT NULL,
-    FOREIGN KEY (fk_peca) REFERENCES peca(id),
-    FOREIGN KEY (fk_compra) REFERENCES compra(id),
-    FOREIGN KEY (fk_venda) REFERENCES venda(id)
 );
 
 -- USUÁRIO
@@ -189,4 +156,23 @@ CREATE TABLE usuario (
     permissao ENUM('ADMIN', 'USUARIO') NOT NULL DEFAULT 'USUARIO',
     senha VARCHAR(255) NOT NULL,
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- MOVIMENTAÇÃO DE ESTOQUE
+
+CREATE TABLE movimentacao_estoque (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    fk_peca INT NOT NULL,
+    fk_usuario INT NOT NULL,
+    tipo ENUM('ENTRADA', 'SAIDA', 'AJUSTE') NOT NULL,
+    quantidade INT NOT NULL,
+    preco_unitario DECIMAL(10,2),
+    data_movimentacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    observacoes TEXT,
+    fk_entrada INT NULL,
+    fk_saida INT NULL,
+    FOREIGN KEY (fk_peca) REFERENCES peca(id),
+    FOREIGN KEY (fk_usuario) REFERENCES usuario(id),
+    FOREIGN KEY (fk_entrada) REFERENCES entrada(id),
+    FOREIGN KEY (fk_saida) REFERENCES saida(id)
 );
