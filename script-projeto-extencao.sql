@@ -3,8 +3,7 @@ use projeto_extensao;
 
 CREATE TABLE categoria (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nome VARCHAR(100) NOT NULL,
-    descricao VARCHAR(255)
+    nome VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE maquina (
@@ -22,6 +21,7 @@ CREATE TABLE fornecedor (
     razao_social VARCHAR(150) NOT NULL,
     cnpj VARCHAR(18) UNIQUE,
     nome_contato VARCHAR(100),
+    nome_empresa VARCHAR(100),
     telefone VARCHAR(20),
     email VARCHAR(100),
 
@@ -58,13 +58,15 @@ CREATE TABLE cliente (
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- PEÇA
+-- ITEM
 
-CREATE TABLE peca (
+CREATE TABLE item (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
     marca VARCHAR(50),
     ano INT,
+    caracteristica_1 VARCHAR(500),
+    caracteristica_2 VARCHAR(500),
     descricao VARCHAR(255),
     quantidade INT NOT NULL DEFAULT 0,
     estoqueMinimo INT DEFAULT 5,
@@ -92,31 +94,31 @@ CREATE TABLE codigo_associado (
         CHECK (fk_fornecedor IS NOT NULL OR fk_cliente IS NOT NULL)
 );
 
-CREATE TABLE peca_codigo_associado (
-    fk_peca INT,
+CREATE TABLE item_codigo_associado (
+    fk_item INT,
     fk_codigo_associado INT,
-    PRIMARY KEY (fk_peca, fk_codigo_associado),
-    FOREIGN KEY (fk_peca) REFERENCES peca(id),
+    PRIMARY KEY (fk_item, fk_codigo_associado),
+    FOREIGN KEY (fk_item) REFERENCES item(id),
     FOREIGN KEY (fk_codigo_associado) REFERENCES codigo_associado(id)
 );
 
-CREATE TABLE peca_maquina (
-    fk_peca INT,
+CREATE TABLE item_maquina (
+    fk_item INT,
     fk_maquina INT,
-    PRIMARY KEY (fk_peca, fk_maquina),
-    FOREIGN KEY (fk_peca) REFERENCES peca(id),
+    PRIMARY KEY (fk_item, fk_maquina),
+    FOREIGN KEY (fk_item) REFERENCES item(id),
     FOREIGN KEY (fk_maquina) REFERENCES maquina(id)
 );
 
 /*
--- Peças similares / equivalentes
-CREATE TABLE peca_similar (
-    fk_peca INT NOT NULL,
-    fk_peca_similar INT NOT NULL,
+-- Itens similares / equivalentes
+CREATE TABLE item_similar (
+    fk_item INT NOT NULL,
+    fk_item_similar INT NOT NULL,
     observacoes TEXT,
-    PRIMARY KEY (fk_peca, fk_peca_similar),
-    FOREIGN KEY (fk_peca) REFERENCES peca(id),
-    FOREIGN KEY (fk_peca_similar) REFERENCES peca(id)
+    PRIMARY KEY (fk_item, fk_item_similar),
+    FOREIGN KEY (fk_item) REFERENCES item(id),
+    FOREIGN KEY (fk_item_similar) REFERENCES item(id)
 );
 */
 
@@ -162,7 +164,7 @@ CREATE TABLE usuario (
 
 CREATE TABLE movimentacao_estoque (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    fk_peca INT NOT NULL,
+    fk_item INT NOT NULL,
     fk_usuario INT NOT NULL,
     tipo ENUM('ENTRADA', 'SAIDA', 'AJUSTE') NOT NULL,
     quantidade INT NOT NULL,
@@ -171,7 +173,7 @@ CREATE TABLE movimentacao_estoque (
     observacoes TEXT,
     fk_entrada INT NULL,
     fk_saida INT NULL,
-    FOREIGN KEY (fk_peca) REFERENCES peca(id),
+    FOREIGN KEY (fk_item) REFERENCES item(id),
     FOREIGN KEY (fk_usuario) REFERENCES usuario(id),
     FOREIGN KEY (fk_entrada) REFERENCES entrada(id),
     FOREIGN KEY (fk_saida) REFERENCES saida(id)
