@@ -96,6 +96,7 @@ CREATE TABLE movimentacao_estoque (
     cliente_id INT,
     fornecedor_id INT,
     movimentacao_original INT,
+    numero_nota_fiscal VARCHAR(45),
     FOREIGN KEY (fk_usuario) REFERENCES usuario(id),
     FOREIGN KEY (tipo_id) REFERENCES tipo(id),
     FOREIGN KEY (status_id) REFERENCES status(id),
@@ -119,10 +120,9 @@ CREATE TABLE fechamento_mes (
     mes INT,
     ano INT,
     qtd INT,
-    movimentacao_estoque_id INT,
-    item_id INT,
-    FOREIGN KEY (movimentacao_estoque_id, item_id)
-        REFERENCES itens_na_movimentacao(movimentacao_estoque_id, item_id)
+    fk_item INT,
+    FOREIGN KEY (fk_item) REFERENCES item(id),
+    UNIQUE(ano, mes, fk_item)
 );
 
 CREATE TABLE fabricante (
