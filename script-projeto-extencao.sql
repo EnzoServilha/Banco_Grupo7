@@ -1,4 +1,5 @@
 DROP DATABASE IF EXISTS projeto_extensao;
+
 CREATE DATABASE projeto_extensao;
 USE projeto_extensao;
 
@@ -80,6 +81,14 @@ CREATE TABLE item (
     descricao TEXT,
     localizacao VARCHAR(100),
     data_cadastro DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE item_similar (
+    fk_item INT NOT NULL,
+    fk_item_similar INT NOT NULL,
+    PRIMARY KEY (fk_item, fk_item_similar),
+    FOREIGN KEY (fk_item) REFERENCES item(id),
+    FOREIGN KEY (fk_item_similar) REFERENCES item(id)
 );
 
 CREATE TABLE movimentacao_estoque (
