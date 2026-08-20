@@ -39,7 +39,8 @@ INSERT INTO permissao (id, nome) VALUES
 INSERT INTO tipo (id, nome) VALUES
 (1, 'ENTRADA'),
 (2, 'SAIDA'),
-(3, 'AJUSTE');
+(3, 'AJUSTE'),
+(4, 'COTACAO');
 
 INSERT INTO status (id, nome) VALUES
 (1, 'PENDENTE'),
