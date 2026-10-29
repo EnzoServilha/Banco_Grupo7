@@ -304,10 +304,6 @@ VALUES
     (3, 1, 10, 188.00),
     (4, 1, 42, 150.00),
     (5, 1, 10, 150.00);
-    
-INSERT INTO itens_na_movimentacao (movimentacao_estoque_id, item_id, qtd, preco_unitario)
-VALUES
-	(7,1, 150, 150.00);
 
 -- CATEGORIAS
 INSERT INTO categoria (nome, ativo) VALUES
@@ -317,7 +313,6 @@ INSERT INTO categoria (nome, ativo) VALUES
 
 -- MARCAS DE TESTE
 INSERT INTO marca (nome_empresa, ativo) VALUES ('Cofap', true), ('Monroe', true);
-
 
 
 
